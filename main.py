@@ -11,19 +11,24 @@ from PIL import Image
 def commander_stats(shuffle_func):
     # play 100 games
     values = np.array([])
+
     for i in range(0,10000):
         deck = list(range(0,100))
         shuffled_deck = shuffle_func(deck.copy(), shuffle_times=50)
 
         # baseline is without a shuffle
         baseline_score = score_shuffle(deck)
+        
         # print(f"baseline: {baseline_score}")
         # print(f"perfect deck score: {baseline_score/score_shuffle(perfect_deck)}")
         # print(f"yugioh deck score: {baseline_score/score_shuffle(yugi_deck)}")
         
         values = np.append(values, baseline_score/score_shuffle(shuffled_deck))
 
-    render_image_deck(deck, shuffle_func.__name__)
+        if i == 0:
+            render_image_deck(deck, "baseline")
+            render_image_deck(shuffled_deck, shuffle_func.__name__)
+
     
     return np.mean(values, axis=0)
     
@@ -68,22 +73,32 @@ def yugioh_shuffle(deck, chunksize_coff=25, shuffle_times=10):
     ndeck = np.array(deck)
     cards = len(ndeck)
 
+    # adds random cards
     for i in range(0, shuffle_times):
-        left = random.randint(0,99)
+        left = random.randint(1,99)
         right = left + random.randint(1, chunksize_coff)
 
         if right > cards: 
             right = cards - 1
             
-        chunk = ndeck[left:right].copy()
-        cut = np.delete(ndeck, chunk)        
+        chunk = ndeck[left-1:right+1].copy()
+        cut = np.delete(ndeck, chunk).copy()        
 
+        
         if random.choice([True, False]):
             ndeck =np.append(chunk, cut)
-        
-        ndeck =np.append(chunk, cut)
-        # break
-            
+        else:
+            ndeck = np.append(cut, chunk)
+
+        if ndeck.size != 100:
+            print(chunk)
+            print(cut)
+            print(f"{ndeck}")
+            break
+
+    # should not need this but we get extra cards!
+    # ndeck = np.unique(ndeck)
+
     return ndeck
             
            
@@ -120,15 +135,24 @@ def score_shuffle(deck):
 
 def render_image_deck(deck, shuffle_name):
     
+    
     deck = deck.copy()
     ndeck = np.array(deck)
 
+    print(len(ndeck))
     # divede by some max 
-    diveded = ndeck/(len(deck))
+    diveded = ndeck/(len(ndeck))
     image = diveded * 255
+    
+    # assuming deck is 100
+    image= np.reshape(image, [10,-1])
+    print(image)
+    
 
-    image = Image.fromarray(image).convert("L")
-    image.save(f"{shuffle_name}.png",move='w')
+    size = (1500,1500)
+    image_ob = Image.fromarray(image).convert("L")
+    image_ob = image_ob.resize(size, resample= Image.NEAREST)
+    image_ob.save(f"{shuffle_name}.png",move='w')
     # multiply by 255
     # https://www.delftstack.com/howto/matplotlib/convert-a-numpy-array-to-pil-image-python/
 
