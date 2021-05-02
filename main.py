@@ -2,6 +2,7 @@ import random
 import pprint
 import numpy as np
 from PIL import Image
+import math as m
 # from mtgtools.MtgDB import MtgDB
 # db = MtgDB("cards.fs")
 
@@ -14,7 +15,8 @@ def commander_stats(shuffle_func):
 
     for i in range(0,10000):
         deck = list(range(0,100))
-        shuffled_deck = shuffle_func(deck.copy(), shuffle_times=50)
+        # shuffle time > 50
+        shuffled_deck = shuffle_func(deck.copy(), shuffle_times=60)
 
         # baseline is without a shuffle
         baseline_score = score_shuffle(deck)
@@ -33,6 +35,11 @@ def commander_stats(shuffle_func):
     return np.mean(values, axis=0)
     
 
+def combo_shuffle(deck, shuffle_times=50):
+    
+    deck = yugioh_shuffle(deck, 10)
+    deck = stack_shuffle(deck, 50)
+    return deck
 
     # pprint.pprint(perfect_deck,compact=True)
 def stack_shuffle(deck, shuffle_times=10):
@@ -43,26 +50,27 @@ def stack_shuffle(deck, shuffle_times=10):
     n_stacks = 8 
 
     #does not work at the moment
-    for i in range(0, int(shuffle_times/3)):
 
-        stacks = np.empty([n_stacks,1])
+
+    for i in range(0, m.floor(shuffle_times/50)):
+
+        # stacks = np.empty([n_stacks,1])
+        stacks = []
+        for i in range(0, n_stacks):
+            stacks.append([])
+        # nstacks = np.array(stacks)
         stack_num = 0
         for card_num, elm in enumerate(np.nditer(ndeck)):
-            current_stack = stacks[stack_num]
 
-
-            # add a card to the stack
-            stacks[stack_num][card_num] = elm
+            stacks[stack_num].append(int(elm))
 
             stack_num += 1
             if n_stacks - 1 < stack_num:
                 stack_num = 0
             
-            print(stacks)
-        # pprint.pprint(stacks, compact=True)
             
         # put them together
-        ndeck = np.flatten(stacks)
+        ndeck = np.hstack(stacks)
     
     return ndeck
 
@@ -160,6 +168,7 @@ def render_image_deck(deck, shuffle_name):
     pass
 
 
-# print(f"stack shuffle {commander_stats(stack_shuffle)}")
+print(f"combo shuffle {commander_stats(combo_shuffle)}")
+print(f"stack shuffle {commander_stats(stack_shuffle)}")
 print(f"perfect_shuffle {commander_stats(perfect_shuffle)}")
 print(f"yugioh {commander_stats(yugioh_shuffle)}")
