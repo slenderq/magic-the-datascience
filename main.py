@@ -79,10 +79,10 @@ def yugioh_shuffle(deck, chunksize_coff=25, shuffle_times=10):
         right = left + random.randint(1, chunksize_coff)
 
         if right > cards: 
-            right = cards - 1
+            right = cards 
             
-        chunk = ndeck[left-1:right+1].copy()
-        cut = np.delete(ndeck, chunk).copy()        
+        chunk = ndeck[left:right].copy()
+        cut = np.delete(ndeck.copy(), slice(left, right))
 
         
         if random.choice([True, False]):
@@ -91,13 +91,16 @@ def yugioh_shuffle(deck, chunksize_coff=25, shuffle_times=10):
             ndeck = np.append(cut, chunk)
 
         if ndeck.size != 100:
+            # ndeck = np.unique(ndeck)
+            print(i)
             print(chunk)
             print(cut)
+            print(left, right)
+        
             print(f"{ndeck}")
-            break
+            print(ndeck.size)
 
     # should not need this but we get extra cards!
-    # ndeck = np.unique(ndeck)
 
     return ndeck
             
