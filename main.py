@@ -142,14 +142,12 @@ def render_image_deck(deck, shuffle_name):
     deck = deck.copy()
     ndeck = np.array(deck)
 
-    print(len(ndeck))
     # divede by some max 
     diveded = ndeck/(len(ndeck))
     image = diveded * 255
     
     # assuming deck is 100
     image= np.reshape(image, [10,-1])
-    print(image)
     
 
     size = (1500,1500)
