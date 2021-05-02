@@ -16,7 +16,7 @@ def commander_stats(shuffle_func):
     for i in range(0,10000):
         deck = list(range(0,100))
         # shuffle time > 50
-        shuffled_deck = shuffle_func(deck.copy(), shuffle_times=60)
+        shuffled_deck = shuffle_func(deck.copy(), shuffle_times=100)
 
         # baseline is without a shuffle
         baseline_score = score_shuffle(deck)
@@ -62,7 +62,11 @@ def stack_shuffle(deck, shuffle_times=10):
         stack_num = 0
         for card_num, elm in enumerate(np.nditer(ndeck)):
 
-            stacks[stack_num].append(int(elm))
+            # chance to put the card randomly in a pile
+            if random.randint(1,2) == 1:
+                stacks[random.randint(0,n_stacks-1)].append(int(elm))
+            else:
+                stacks[stack_num].append(int(elm))
 
             stack_num += 1
             if n_stacks - 1 < stack_num:
@@ -82,7 +86,7 @@ def yugioh_shuffle(deck, chunksize_coff=25, shuffle_times=10):
     cards = len(ndeck)
 
     # adds random cards
-    for i in range(0, shuffle_times):
+    for i in range(0, m.floor(shuffle_times/5)):
         left = random.randint(1,99)
         right = left + random.randint(1, chunksize_coff)
 
